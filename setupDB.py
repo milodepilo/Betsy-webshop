@@ -55,7 +55,8 @@ def populate_test_DB():
             description = product[1],
             price_in_cents = product[2],            
             )
-
+        Product.add_index(Product.name, Product.description)
+        
         for tag in product_tags:            
             ProductTag.create(
                 product_id = Product.select(Product.id).where(Product.name == product[0].lower()).get(),

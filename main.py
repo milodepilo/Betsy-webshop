@@ -4,12 +4,19 @@ __human_name__ = "Betsy Webshop"
 from setupDB import populate_test_DB, delete_database
 from models import (Product, User, UserProduct, ProductTag, Tag, Transactions)
 
+
 delete_database()
 populate_test_DB()
 
 
 def search(term):
-    return Product.select().where(Product.name.contains(term.lower())).get()
+
+    query = (Product.select(Product)
+            .where((term & Product.name))
+            #         (Product.description % term.lower()))
+             )
+    for item in query:
+        print(item.name)
 
 
 def list_user_products(user_id):
@@ -46,44 +53,41 @@ def add_product_to_catalog(user_id, product):
         stock=product["stock"]
     )
 
+
 def remove_product(product_id, user_id):
-    remove = UserProduct.delete().where((UserProduct.product_id == product_id)&(UserProduct.user_id == user_id))
+    remove = UserProduct.delete().where((UserProduct.product_id == product_id)
+                                        & (UserProduct.user_id == user_id))
     remove.execute()
+
 
 def update_stock(product_id, user_id, new_quantity):
     query = (UserProduct
              .update(stock=new_quantity)
-             .where((UserProduct.product_id == product_id) & 
-             (UserProduct.user_id == user_id)))
+             .where((UserProduct.product_id == product_id) &
+                    (UserProduct.user_id == user_id)))
     query.execute()
 
 
-def purchase_product(product_id, buyer_id, seller_id, quantity):    
-    new_stock = 0    
+def purchase_product(product_id, buyer_id, seller_id, quantity):
+    new_stock = 0
     old_stock = (UserProduct.select()
-                .where((UserProduct.product_id == product_id)&
-                (UserProduct.user_id == seller_id)))
+                 .where((UserProduct.product_id == product_id) &
+                        (UserProduct.user_id == seller_id)))
 
     for stock in old_stock:
-        print(stock.stock)        
         new_stock = stock.stock - quantity
-        old_id = stock.id 
-    print(new_stock)
+        old_id = stock.id
     if new_stock <= 0:
         remove_product(product_id, buyer_id)
 
-
     update_stock(product_id, seller_id, new_stock)
     update_stock(product_id, buyer_id, quantity)
-    
-    
-    
-    up, created = UserProduct.get_or_create(
-        user_id = buyer_id,
-        product_id = product_id,
-        defaults= {"stock": 1}
-    )
 
+    up, created = UserProduct.get_or_create(
+        user_id=buyer_id,
+        product_id=product_id,
+        defaults={"stock": 1}
+    )
 
     transaction = Transactions.create(
         from_seller=seller_id,
@@ -94,9 +98,6 @@ def purchase_product(product_id, buyer_id, seller_id, quantity):
     )
 
 
-
-
-
 # drawing_hands = {
 #     "name": "drawing hands",
 #     "description": "2 hands drawing each other",
@@ -105,11 +106,8 @@ def purchase_product(product_id, buyer_id, seller_id, quantity):
 # }
 
 
-
-
-
 # add_product_to_catalog(1, drawing_hands)
-# print(search("hand"))
+print(search("scream"))
 # update_stock(1,1,2)
 # purchase_product(1, 2, 1, 1)
 # remove_product(2, 2)
