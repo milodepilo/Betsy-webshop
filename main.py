@@ -3,6 +3,7 @@ __human_name__ = "Betsy Webshop"
 
 from setupDB import populate_test_DB, delete_database
 from models import (Product, User, UserProduct, ProductTag, Tag, Transactions)
+from autocorrect import Speller
 
 
 delete_database()
@@ -10,11 +11,12 @@ populate_test_DB()
 
 
 def search(term):
+    check = Speller(lang="en")
 
     query = (Product.select(Product)
-            .where((term & Product.name))
-            #         (Product.description % term.lower()))
-             )
+             .where((Product.name.contains(check(term.lower()))) |
+             (Product.description.contains(check(term.lower())))))
+
     for item in query:
         print(item.name)
 
@@ -107,7 +109,7 @@ def purchase_product(product_id, buyer_id, seller_id, quantity):
 
 
 # add_product_to_catalog(1, drawing_hands)
-print(search("scream"))
+print(search("screaim"))
 # update_stock(1,1,2)
 # purchase_product(1, 2, 1, 1)
 # remove_product(2, 2)
