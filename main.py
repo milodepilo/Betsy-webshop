@@ -109,7 +109,7 @@ def purchase_product(product_id, buyer_id, seller_id, quantity):
 
 
 # add_product_to_catalog(1, drawing_hands)
-print(search("screaim"))
+# print(search("screaim"))
 # update_stock(1,1,2)
 # purchase_product(1, 2, 1, 1)
 # remove_product(2, 2)
